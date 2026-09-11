@@ -232,17 +232,19 @@ export function PersistentHomeBackground() {
       <div className="home-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="home-bg__poster" src={POSTER} alt="" />
-        <iframe
-          ref={iframeRef}
-          id={IFRAME_ID}
-          className="home-bg__iframe"
-          src={EMBED_SRC}
-          title="Hardcore Yoga Nidra"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-          tabIndex={-1}
-        />
+        <div className="home-bg__iframe-mount">
+          <iframe
+            ref={iframeRef}
+            id={IFRAME_ID}
+            className="home-bg__iframe"
+            src={EMBED_SRC}
+            title="Hardcore Yoga Nidra"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            tabIndex={-1}
+          />
+        </div>
       </div>
       <div className="home-bg-slot__veil" />
     </div>

@@ -104,6 +104,16 @@ body {
   background: var(--color-bg);
 }
 
+/* Mobile: no sideways rubber-band revealing wallpaper at edges */
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    max-width: 100%;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -312,7 +322,7 @@ html[data-register-page="true"] .site-panel__content {
   display: none;
 }
 
-/* Register: no bottom nav — still allow last CTA to scroll to mid-window */
+/* Register desktop: allow last CTA to scroll to mid-window */
 html[data-register-page="true"] .site-panel__scroll-end {
   display: block;
   width: 100%;
@@ -349,7 +359,7 @@ html[data-register-page="true"] .site-panel__scroll-end {
     align-items: center;
     gap: var(--mobile-chrome-gap);
     width: max-content;
-    max-width: calc(100vw - 2 * var(--page-padding-inline));
+    max-width: calc(100% - 2 * var(--page-padding-inline));
     height: var(--mobile-chrome-height);
     pointer-events: none;
     user-select: none;
@@ -452,14 +462,15 @@ html[data-register-page="true"] .site-panel__scroll-end {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
-    height: var(--nav-bottom-gradient-height);
+    /* Extend below the screen so bounce / Safari bar stay black */
+    bottom: -40vh;
+    height: calc(var(--nav-bottom-gradient-height) + 40vh);
     z-index: 18;
     pointer-events: none;
     background: linear-gradient(
       to top,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) calc(var(--nav-bottom-pad) + var(--mobile-chrome-height)),
+      #000 0%,
+      #000 calc(40vh + var(--nav-bottom-pad) + var(--mobile-chrome-height)),
       rgba(0, 0, 0, 0) 100%
     );
   }
@@ -480,6 +491,7 @@ html[data-register-page="true"] .site-panel__scroll-end {
   .site-panel {
     margin-left: 0;
     min-height: auto;
+    background: #000;
   }
 
   .site-panel__inner {
@@ -553,13 +565,39 @@ html[data-register-page="true"] .site-panel__scroll-end {
 }
 
 /*
-  Mobile panel is full-bleed (panel-left: 0). A fully covered cross-origin
-  iframe is discarded by Safari — returning home reloads the video.
-  Leave a 1px uncovered strip so the wallpaper stays alive under the panel.
+  Mobile: wallpaper only on home. Elsewhere hide it and use a full black
+  panel — avoids the old 1px Safari “keepalive” seam without overflowing
+  the page with negative vw tricks.
 */
 @media (max-width: 767px) {
-  .site-panel__backdrop {
-    left: 1px;
+  .home-bg-slot {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    contain: paint;
+    background: #000;
+  }
+
+  .home-bg__iframe-mount {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    contain: paint;
+  }
+
+  html:not(:has(.page-home)) .home-bg {
+    visibility: hidden;
+  }
+
+  html:not(:has(.page-home)) .site-panel__backdrop,
+  html:not(:has(.page-home)) .home-bg-slot__veil {
+    inset: 0;
+    background: #000;
+    opacity: 1;
+  }
+
+  html:not(:has(.page-home)) .site-panel {
+    background: #000;
   }
 }
 
@@ -824,7 +862,7 @@ html:has(.install-detail--desktop) body {
   position: fixed;
   top: var(--install-detail-stage-top);
   left: 0;
-  width: 100vw;
+  width: 100%;
   bottom: 0;
   z-index: 40;
   display: flex;
@@ -1528,8 +1566,11 @@ html[data-sound-faded="true"] .home-sound-toggle {
   position: fixed;
   inset: 0;
   z-index: 0;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   pointer-events: none;
+  contain: paint;
 }
 
 /*
@@ -1556,12 +1597,6 @@ html:has(.registration-details) .home-bg-slot__veil,
 html:has(.project-page) .home-bg-slot__veil {
   opacity: 1;
   transition: none;
-}
-
-@media (max-width: 767px) {
-  .home-bg-slot__veil {
-    left: 1px;
-  }
 }
 
 .home-bg {
@@ -1619,11 +1654,12 @@ html:has(.project-page) .home-bg-slot__veil {
   pointer-events: none;
 }
 
-/* Avoid transform scale on iOS — it often blanks the YouTube layer */
+/* Avoid transform scale on iOS — it often blanks the YouTube layer.
+   Use % of the clipped mount (not vw) so the iframe cannot widen the page. */
 @media (max-width: 767px) {
   .home-bg__iframe {
-    width: max(160vw, 220vh);
-    height: max(160vh, 90vw);
+    width: 250%;
+    height: 250%;
     transform: translate(-50%, -50%);
   }
 }
