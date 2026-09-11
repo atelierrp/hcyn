@@ -1396,6 +1396,23 @@ html:has(.page-home) body {
   margin: 2em 0;
 }
 
+.registration-details__media.registration-details__mid-image {
+  margin: 2em 0 0;
+}
+
+.registration-details__mid-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.registration-details__mid-caption {
+  margin: 0.5em 0 1.25em;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-body);
+  color: var(--color-gray);
+}
+
 .registration-details__video-heading {
   margin: 0 0 0.75em;
   font-family: var(--font-family-nav);

@@ -20,12 +20,14 @@ export const registrations = [
       "Rooted in Berlin’s club scene, withdrawal in Switzerland, and a laboratory in a village in northern Thailand, HCYN tests the limits between waking and sleep.",
       "In Bangkok, Black Square is presented as a live session for 12 bodies inside the concrete hall of Begrüntes Haus.",
     ],
-    youtubeUrl: "https://youtu.be/eBnWYTcDTuw",
+    midImage: "/images/installations/black-square/hcyn-bs-07.jpg",
+    midImageAlt: "Black Square",
+    midImageCaption: "Black Square, San Sai Warehouse, Chiang Mai, 2025",
     afterVideoParagraphs: [
       "For this edition, HCYN works with the powerful local HeadSpace sound system. The physical pressure of low frequencies is placed against an almost motionless room: bodies lying down, eyes closed, listening.",
     ],
     practicalLine:
-      "Oct 3 / Begrüntes Haus / ~40 min / allow 60 min / capacity 12\nMats provided / please wear black or dark clothing",
+      "Oct 3 / Begrüntes Haus / ~40 min \ncapacity 12 / Mats provided",
     registrationUrl: "https://www.ticketmelon.com/sach/hardcoreyoganidra",
     registrationLabel: "Register — 400 THB",
   },

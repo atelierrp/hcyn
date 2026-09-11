@@ -1,9 +1,10 @@
 import { seo } from "@/content/seo";
-import { getInstallationSlugs } from "@/lib/content";
+import { getInstallationSlugs, getRegistrationSlugs } from "@/lib/content";
 import {
   getIndexableStaticRoutes,
   getSiteUrl,
   installationDetailsIndexable,
+  registrationsIndexable,
 } from "@/lib/metadata";
 
 export const dynamic = "force-static";
@@ -26,5 +27,14 @@ export default function sitemap() {
       }))
     : [];
 
-  return [...staticRoutes, ...installationRoutes];
+  const register = seo.register;
+  const registrationRoutes = registrationsIndexable()
+    ? getRegistrationSlugs().map((slug) => ({
+        url: `${base}/register/${slug}`,
+        changeFrequency: register.changeFrequency ?? "weekly",
+        priority: register.priority ?? 0.8,
+      }))
+    : [];
+
+  return [...staticRoutes, ...installationRoutes, ...registrationRoutes];
 }

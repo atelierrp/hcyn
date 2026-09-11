@@ -54,6 +54,22 @@ function RegistrationHero({ registration }) {
 }
 
 function RegistrationVideoBlock({ registration }) {
+  if (registration.midImage) {
+    return (
+      <figure className="registration-details__media registration-details__mid-image">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={registration.midImage}
+          alt={registration.midImageAlt ?? registration.title}
+        />
+        {registration.midImageCaption ? (
+          <figcaption className="registration-details__mid-caption">
+            {registration.midImageCaption}
+          </figcaption>
+        ) : null}
+      </figure>
+    );
+  }
   if (!registration.youtubeUrl) return null;
   return (
     <section className="registration-details__video-block" aria-label="video">
@@ -72,6 +88,19 @@ function RegistrationVideoBlock({ registration }) {
         />
       </figure>
     </section>
+  );
+}
+
+function RegistrationAfterVideoImage({ registration }) {
+  if (!registration.afterVideoImage) return null;
+  return (
+    <figure className="registration-details__media">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={registration.afterVideoImage}
+        alt={registration.afterVideoImageAlt ?? ""}
+      />
+    </figure>
   );
 }
 
@@ -103,6 +132,7 @@ function RegistrationProse({ registration }) {
       {registration.afterVideoParagraphs?.map((paragraph, i) => (
         <p key={`after-${i}`}>{paragraph}</p>
       ))}
+      <RegistrationAfterVideoImage registration={registration} />
       {registration.practicalLine ? (
         <p className="registration-details__practical">
           {registration.practicalLine.split("\n").map((line, i, lines) => (

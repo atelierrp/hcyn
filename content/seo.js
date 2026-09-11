@@ -63,7 +63,9 @@ export const seo = {
   /** /register/[slug] */
   register: {
     pathPrefix: "/register/",
-    index: false,
+    index: true,
+    changeFrequency: "weekly",
+    priority: 0.8,
   },
 
   notFound: {

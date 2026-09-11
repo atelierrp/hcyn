@@ -82,7 +82,7 @@ export function InstallationList({ upcoming, past }) {
       />
       <InstallationSection
         id="installations-past"
-        title="past"
+        title="archive"
         items={past}
       />
     </div>
