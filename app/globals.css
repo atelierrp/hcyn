@@ -285,6 +285,23 @@ video {
   pointer-events: none;
 }
 
+html[data-register-page="true"] .site-nav-fixed {
+  display: none;
+}
+
+html[data-register-page="true"] .home-sound-layer {
+  display: none;
+}
+
+/* No nav on register — drop the spacer / extra content offset */
+html[data-register-page="true"] .site-panel__nav-spacer {
+  display: none;
+}
+
+html[data-register-page="true"] .site-panel__content {
+  margin-top: 0;
+}
+
 /* Mobile bottom gradient — behind the nav */
 .site-nav-bottom-gradient {
   display: none;
@@ -293,6 +310,24 @@ video {
 /* Desktop: hide mobile-only chrome */
 .site-panel__scroll-end {
   display: none;
+}
+
+/* Register: no bottom nav — still allow last CTA to scroll to mid-window */
+html[data-register-page="true"] .site-panel__scroll-end {
+  display: block;
+  width: 100%;
+  height: var(--nav-scroll-clearance, 50vh);
+  min-height: var(--nav-scroll-clearance, 50vh);
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+@supports (height: 50dvh) {
+  html[data-register-page="true"] .site-panel__scroll-end {
+    height: 50dvh;
+    min-height: 50dvh;
+  }
 }
 
 .site-logo-inline {
@@ -1337,6 +1372,43 @@ html:has(.page-home) body {
   margin: 1.25em 0 0;
 }
 
+.registration-details__cta--primary {
+  margin-top: 1.75em;
+}
+
+.registration-details__cta--primary a {
+  font-family: var(--font-family-nav);
+  color: var(--color-white);
+  text-decoration: none;
+}
+
+.registration-details__external::after {
+  content: " \2197";
+  font-size: 1em;
+}
+
+.registration-details__practical {
+  margin: 2em 0 0;
+  color: var(--color-gray);
+}
+
+.registration-details__video-block {
+  margin: 2em 0;
+}
+
+.registration-details__video-heading {
+  margin: 0 0 0.75em;
+  font-family: var(--font-family-nav);
+  font-size: var(--font-size-main);
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--color-white);
+}
+
+.registration-details__details {
+  margin-top: 2em;
+}
+
 .registration-details__meta {
   margin: 0.15em 0 0;
 }
@@ -1350,6 +1422,16 @@ html:has(.page-home) body {
   padding: 0;
   max-width: 100%;
   text-align: left;
+}
+
+.registration-details__media--hero {
+  margin: 0 0 1.75em;
+}
+
+.registration-details__media--hero img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .registration-details__media img {

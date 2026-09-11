@@ -10,11 +10,13 @@ const MOBILE_MQ = "(max-width: 767px)";
 /**
  * Top-layer mute control. Calls the wallpaper applier in the same tap turn.
  * Phone: home always; other routes only while unmuted (so you can mute).
- * Desktop: always available.
+ * Desktop: always available — except register pages (hidden).
  */
 export function HomeSoundToggle() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isRegister =
+    pathname === "/register" || pathname.startsWith("/register/");
   const [muted, setMuted] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -44,8 +46,9 @@ export function HomeSoundToggle() {
     applyHomeSoundMuted(nextMuted);
   }
 
-  // Phone: hide on subpages while muted. Desktop: always show.
-  const visible = !isMobile || isHome || !muted;
+  // Register: always hide. Phone: home, or other routes while unmuted. Desktop: show.
+  const visible =
+    !isRegister && (!isMobile || isHome || !muted);
 
   const node = (
     <div

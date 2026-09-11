@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function EventBody({ event }) {
   const place = [event.venue, event.city].filter(Boolean).join(", ");
 
@@ -10,11 +12,19 @@ function EventBody({ event }) {
 }
 
 function EventItem({ event }) {
+  const href = event.registrationRoute ?? event.installationRoute ?? null;
+
   return (
     <li className="event-item">
-      <div className="event-item__text">
-        <EventBody event={event} />
-      </div>
+      {href ? (
+        <Link href={href} className="event-item__link">
+          <EventBody event={event} />
+        </Link>
+      ) : (
+        <div className="event-item__text">
+          <EventBody event={event} />
+        </div>
+      )}
     </li>
   );
 }

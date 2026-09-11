@@ -19,7 +19,7 @@ export const liveEvents = [
     venue: "Begrüntes Haus",
     country: "Thailand",
     status: "upcoming",
-    note: "Related installation slug paradise-bangkok has no body content yet.",
+    registrationRoute: "/register/bangkok",
   },
   {
     slug: "zurich-june-2026",

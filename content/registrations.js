@@ -2,10 +2,33 @@
  * Registration pages for /register/[slug].
  * Sources: roman-ne-web/src/pages/hcyn.astro, hcyn-yerevan.astro
  *
- * Both entries marked past relative to scaffold date (Aug 2026).
- * Google Form URLs preserved as external links.
+ * Zurich / Yerevan marked past relative to scaffold date (Aug 2026).
+ * Google Form URLs preserved as external links where available.
  */
 export const registrations = [
+  {
+    slug: "bangkok",
+    title: "Black Square / Bangkok / October 3, 2026",
+    city: "Bangkok",
+    venue: "Begrüntes Haus",
+    location: "Bangkok",
+    status: "upcoming",
+    heroImage: "/images/registrations/bangkok-begruentes.jpg",
+    heroImageAlt: "Begrüntes Haus, Bangkok",
+    paragraphs: [
+      "HCYN moves across body, sound, silence and pressure.",
+      "Rooted in Berlin’s club scene, withdrawal in Switzerland, and a laboratory in a village in northern Thailand, HCYN tests the limits between waking and sleep.",
+      "In Bangkok, Black Square is presented as a live session for 12 bodies inside the concrete hall of Begrüntes Haus.",
+    ],
+    youtubeUrl: "https://youtu.be/eBnWYTcDTuw",
+    afterVideoParagraphs: [
+      "For this edition, HCYN works with the powerful local HeadSpace sound system. The physical pressure of low frequencies is placed against an almost motionless room: bodies lying down, eyes closed, listening.",
+    ],
+    practicalLine:
+      "Oct 3 / Begrüntes Haus / ~40 min / allow 60 min / capacity 12\nMats provided / please wear black or dark clothing",
+    registrationUrl: "https://www.ticketmelon.com/sach/hardcoreyoganidra",
+    registrationLabel: "Register — 400 THB",
+  },
   {
     slug: "zurich",
     title: "hardcore yoga nidra",
@@ -25,7 +48,7 @@ export const registrations = [
     ],
     price: "20 CHF",
     registrationUrl: "https://forms.gle/Y2U8zsY1VhuiqLAAA",
-    registrationLabel: "→ registration form",
+    registrationLabel: "registration form",
     status: "past",
     youtubeUrl: "https://youtu.be/eBnWYTcDTuw",
   },
@@ -47,7 +70,7 @@ export const registrations = [
       "free participation",
     ],
     registrationUrl: "https://forms.gle/fmERHyEHMGQzzXs39",
-    registrationLabel: "→ register via form",
+    registrationLabel: "register via form",
     status: "past",
     youtubeUrl: "https://youtu.be/eBnWYTcDTuw",
   },

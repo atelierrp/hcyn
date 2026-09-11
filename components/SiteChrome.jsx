@@ -36,6 +36,12 @@ export function SiteChrome({ children }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useLayoutEffect(() => {
+    document.documentElement.dataset.registerPage = isRegister
+      ? "true"
+      : "false";
+  }, [isRegister]);
+
+  useLayoutEffect(() => {
     const media = window.matchMedia(MOBILE_MQ);
     const syncMobile = () => setIsMobile(media.matches);
     syncMobile();
@@ -94,10 +100,13 @@ export function SiteChrome({ children }) {
 
         <div
           className={
-            navFaded ? "site-nav-fixed site-nav-fixed--faded" : "site-nav-fixed"
+            isRegister || navFaded
+              ? "site-nav-fixed site-nav-fixed--faded"
+              : "site-nav-fixed"
           }
+          {...(isRegister ? { "aria-hidden": true } : {})}
         >
-          <SiteNav />
+          {isRegister ? null : <SiteNav />}
         </div>
       </div>
 
