@@ -934,8 +934,21 @@ html.install-detail-gallery-active body::-webkit-scrollbar {
 html.install-detail-gallery-active .site-bottom-chrome,
 html.install-detail-gallery-active .site-logo-fixed,
 html.install-detail-gallery-active .site-nav-fixed {
+  /* Stay painted under the stage — don’t unmount/hide (avoids pop on close) */
   pointer-events: none;
-  visibility: hidden;
+}
+
+/*
+  Sound stays with nav (z:15): above the veil/backdrop, under the install
+  panel stacking context (z:16) so an open gallery covers it — no hide/fade.
+*/
+html.install-detail-gallery-active .home-sound-layer {
+  z-index: 15;
+}
+
+html.install-detail-gallery-active .home-sound-toggle {
+  opacity: 1;
+  transition: none;
 }
 
 /* Mobile: simple full-width scrolling column */
@@ -1366,7 +1379,8 @@ html:has(.page-home) body {
 .home-sound-layer {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  /* Same band as nav: above backdrop (7), under install panel (16) */
+  z-index: 15;
   pointer-events: none;
 }
 
@@ -1409,12 +1423,6 @@ html:has(.page-home) body {
 html[data-sound-faded="true"] .home-sound-toggle {
   opacity: 0;
   pointer-events: none;
-}
-
-html.install-detail-gallery-active .home-sound-toggle {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
 }
 
 .home-bg-slot {

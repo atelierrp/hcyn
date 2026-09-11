@@ -62,10 +62,13 @@ export function SiteChrome({ children }) {
       );
       document.documentElement.dataset.scrollFaded =
         forceBlack || scrolled ? "true" : "false";
-      // Mute fades on scroll on phone + desktop (independent of bottom nav).
-      document.documentElement.dataset.soundFaded = scrolled
-        ? "true"
-        : "false";
+      // Mute never fades on install/register/project (same as nav on those pages).
+      document.documentElement.dataset.soundFaded =
+        isInstallationDetail || isRegister || isProject
+          ? "false"
+          : scrolled
+            ? "true"
+            : "false";
     };
     sync();
     window.addEventListener("scroll", sync, { passive: true });
