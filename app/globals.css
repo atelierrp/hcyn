@@ -43,18 +43,25 @@
 
 @media (max-width: 767px) {
   :root {
-    --font-size-xl-base: clamp(2.75rem, 14vw, 4.5rem);
+    --font-size-xl-base: clamp(1.85rem, 9vw, 2.5rem);
     --font-size-xl: var(--font-size-xl-base);
+    /* Match prod mobile nav: 21px type, 28px rows */
     --font-size-nav: var(--font-size-main);
     --nav-link-height: 28px;
     --panel-left: 0px;
     --panel-gradient-width: 0px;
-    --nav-block-height: calc(3 * var(--nav-link-height));
+    --mobile-chrome-gap: var(--page-padding-inline);
+    --mobile-logo-size: calc(var(--font-size-xl) * 5.6 * 373 / 425);
+    --mobile-chrome-height: max(
+      calc(var(--mobile-logo-size) * 746 / 1645),
+      calc(3 * var(--nav-link-height))
+    );
+    --nav-block-height: var(--mobile-chrome-height);
     /* Requires viewport-fit=cover (see app/layout.jsx) */
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --nav-bottom-pad: calc(var(--safe-bottom) + 1rem);
     --nav-bottom-gradient-height: calc(
-      var(--nav-bottom-pad) + var(--nav-block-height) + 3rem
+      var(--nav-bottom-pad) + var(--mobile-chrome-height) + 3rem
     );
     /* Half viewport — last items can sit mid-screen above the nav */
     --nav-scroll-clearance: 50vh;
@@ -135,7 +142,7 @@ video {
   top: 0;
   left: 0;
   z-index: 5;
-  padding: var(--page-padding-top) var(--page-padding-inline) 0;
+  padding: calc(var(--page-padding-top) + 4px) var(--page-padding-inline) 0;
   pointer-events: none;
   user-select: none;
   transition: opacity 0.3s ease;
@@ -155,7 +162,8 @@ video {
 .site-logo {
   position: relative;
   display: grid;
-  width: max-content;
+  /* SVG reads wider than text lockup (425 vs 373); scale to match text width */
+  width: calc(var(--font-size-xl) * 5.6 * 373 / 425);
   font-family: var(--font-family-logo);
   font-size: var(--font-size-xl);
   font-weight: 800;
@@ -179,19 +187,14 @@ video {
 
 .site-logo__full {
   display: block;
-  text-transform: lowercase;
   opacity: 1;
 }
 
-.site-logo__full span {
+.site-logo__mark {
   display: block;
-  line-height: var(--line-height-xl);
-  margin: 0;
-}
-
-/* Optical: hardcore has no descenders — slight pull only */
-.site-logo__full span:first-child {
-  margin-bottom: -0.04em;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1645 / 746;
 }
 
 .site-logo__short {
@@ -211,6 +214,11 @@ video {
 .site-logo--compact .site-logo__short {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Desktop: wrapper is transparent so logo/nav keep released fixed positions */
+.site-bottom-chrome {
+  display: contents;
 }
 
 /* —— Nav (shared styles) —— */
@@ -292,27 +300,75 @@ video {
 }
 
 @media (max-width: 767px) {
-  /* Content pages: fixed stacked logo off; inline logo on */
-  body:has(.site-logo-inline) .site-logo-fixed {
-    display: none;
+  /*
+    Bottom chrome: logo + nav side by side, gap = 2× page padding.
+    Nav type/row metrics match prod (21px / 28px rows).
+  */
+  .site-bottom-chrome {
+    display: flex;
+    position: fixed;
+    bottom: var(--nav-bottom-pad);
+    left: var(--page-padding-inline);
+    right: auto;
+    z-index: 20;
+    align-items: center;
+    gap: var(--mobile-chrome-gap);
+    width: max-content;
+    max-width: calc(100vw - 2 * var(--page-padding-inline));
+    height: var(--mobile-chrome-height);
+    pointer-events: none;
+    user-select: none;
   }
 
-  .site-logo-inline {
-    display: block;
-    margin: 0 0 calc(2 * var(--font-size-main) * var(--line-height-body));
+  .site-logo-fixed {
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    flex: 0 0 auto;
+    width: var(--mobile-logo-size);
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    z-index: auto;
+    opacity: 1;
+    pointer-events: auto;
+    transition: none;
   }
 
-  .site-panel__nav-spacer {
-    display: none;
+  .site-logo-fixed .site-header {
+    width: 100%;
+  }
+
+  .site-logo-fixed .site-logo {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-logo-fixed .site-logo__mark {
+    width: 100%;
+    height: auto;
   }
 
   .site-nav-fixed {
+    position: static;
     top: auto;
-    bottom: var(--nav-bottom-pad);
-    left: var(--page-padding-inline);
-    z-index: 20;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    z-index: auto;
     opacity: 1;
     pointer-events: auto;
+    transition: none;
   }
 
   .site-nav-fixed--faded {
@@ -320,10 +376,40 @@ video {
     pointer-events: auto;
   }
 
-  .site-nav a {
-    min-height: var(--nav-link-height);
+  .site-nav-fixed .site-nav {
+    font-size: var(--font-size-nav);
+    line-height: 1;
+  }
+
+  .site-nav-fixed .site-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .site-nav-fixed .site-nav li {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  /* Prod mobile nav rows */
+  .site-nav-fixed .site-nav a {
     display: flex;
     align-items: center;
+    min-height: var(--nav-link-height);
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-size: inherit;
+  }
+
+  .site-panel__nav-spacer {
+    display: none;
+  }
+
+  .site-logo-inline {
+    display: none;
   }
 
   .site-nav-bottom-gradient {
@@ -338,19 +424,14 @@ video {
     background: linear-gradient(
       to top,
       rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) calc(var(--nav-bottom-pad) + var(--nav-block-height)),
+      rgba(0, 0, 0, 1) calc(var(--nav-bottom-pad) + var(--mobile-chrome-height)),
       rgba(0, 0, 0, 0) 100%
     );
   }
 
-  /* Home: nav over wallpaper, no bottom gradient */
+  /* Home: chrome over wallpaper, no bottom gradient */
   html:has(.page-home) .site-nav-bottom-gradient {
     display: none;
-  }
-
-  /* Subpages: always show the bottom fade behind nav */
-  body:has(.site-logo-inline) .site-nav-bottom-gradient {
-    display: block;
   }
 
   .site-panel__backdrop {
@@ -392,18 +473,29 @@ video {
     }
   }
 
-  /* Inline logo scrolls with content — Extended, body size, single line */
-  .site-logo--inline {
-    display: inline;
-    font-family: var(--font-family-nav);
-    font-size: var(--font-size-main);
-    font-weight: 400;
-    line-height: var(--line-height-body);
-    letter-spacing: 0;
-    text-transform: lowercase;
+  .site-panel__content {
+    /* Match list pages (Live) — was overridden to 0 for install-detail only */
+    margin-top: calc(2 * var(--font-size-main) * var(--line-height-body));
   }
 
-  .site-panel__content {
+  /*
+    List / copy / detail pages share the same top: panel padding + content gap.
+  */
+  .site-panel__inner {
+    padding-top: var(--page-padding-top);
+  }
+
+  .content-page,
+  .install-list,
+  .connect-list,
+  .prose-body,
+  .install-detail--simple {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .section-block:first-child,
+  .install-section:first-child {
     margin-top: 0;
   }
 
@@ -477,6 +569,13 @@ video {
   margin-top: calc(2 * var(--font-size-main) * var(--line-height-body));
 }
 
+/* Desktop detail: fixed header — no extra content offset (mobile keeps list gap) */
+@media (min-width: 768px) {
+  .site-panel__content:has(.install-detail) {
+    margin-top: 0;
+  }
+}
+
 /* Installations detail: desktop gallery locks page; mobile is normal scroll */
 .site-panel:has(.install-detail--desktop) {
   z-index: 16;
@@ -505,10 +604,6 @@ html:has(.install-detail--desktop) {
 
 html:has(.install-detail--desktop) body {
   overflow: hidden;
-}
-
-.site-panel__content:has(.install-detail) {
-  margin-top: 0;
 }
 
 /* Installations index: allow wider column for portrait grid */
@@ -619,6 +714,11 @@ html:has(.install-detail--desktop) body {
 .connect-list a {
   color: var(--color-gray);
   text-decoration: none;
+}
+
+.connect-list__external::after {
+  content: " \2197";
+  font-size: 1em;
 }
 
 /* —— Installation detail —— */
@@ -831,9 +931,11 @@ html.install-detail-gallery-active body::-webkit-scrollbar {
   display: none;
 }
 
+html.install-detail-gallery-active .site-bottom-chrome,
 html.install-detail-gallery-active .site-logo-fixed,
 html.install-detail-gallery-active .site-nav-fixed {
   pointer-events: none;
+  visibility: hidden;
 }
 
 /* Mobile: simple full-width scrolling column */
@@ -977,8 +1079,19 @@ html.install-detail-gallery-active .site-nav-fixed {
 
 .page-home {
   position: relative;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   overflow: hidden;
+}
+
+/* Lock document scroll on home — tiny overflow was fading the wallpaper */
+html:has(.page-home),
+html:has(.page-home) body {
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .page-home .visually-hidden {
@@ -1249,13 +1362,24 @@ html.install-detail-gallery-active .site-nav-fixed {
 
 /* —— Homepage / site wallpaper —— */
 
-.home-sound-toggle {
+/* Full-viewport layer above page chrome; only the button receives taps */
+.home-sound-layer {
   position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.home-sound-toggle {
+  position: absolute;
   top: calc(var(--page-padding-top) + var(--nav-top-nudge));
   right: var(--page-padding-inline);
-  z-index: 15;
+  z-index: 1;
   margin: 0;
-  padding: 0;
+  /* Min 44×44 tap target for iOS */
+  padding: 0.75rem;
+  margin-right: -0.75rem;
+  margin-top: -0.75rem;
   border: 0;
   background: none;
   font-family: var(--font-family-nav);
@@ -1267,13 +1391,30 @@ html.install-detail-gallery-active .site-nav-fixed {
   text-decoration: none;
   text-transform: none;
   user-select: none;
+  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  pointer-events: auto;
+  touch-action: manipulation;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 .home-sound-toggle:focus,
 .home-sound-toggle:focus-visible {
   outline: none;
+}
+
+/* Fade with scroll — same transition as nav */
+html[data-sound-faded="true"] .home-sound-toggle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.install-detail-gallery-active .home-sound-toggle {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .home-bg-slot {
@@ -1300,6 +1441,14 @@ html.install-detail-gallery-active .site-nav-fixed {
 
 html[data-scroll-faded="true"] .home-bg-slot__veil {
   opacity: 1;
+}
+
+/* Black pages: veil on first paint without a blocking <script> */
+html:has(.install-detail) .home-bg-slot__veil,
+html:has(.registration-details) .home-bg-slot__veil,
+html:has(.project-page) .home-bg-slot__veil {
+  opacity: 1;
+  transition: none;
 }
 
 @media (max-width: 767px) {

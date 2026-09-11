@@ -1,4 +1,5 @@
 import localFont from "next/font/local";
+import { HomeSoundToggle } from "@/components/HomeSoundToggle";
 import { PersistentHomeBackground } from "@/components/PersistentHomeBackground";
 import { SiteChrome } from "@/components/SiteChrome";
 import { getSiteUrl, ogImage } from "@/lib/metadata";
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
       <body>
         <PersistentHomeBackground />
         <SiteChrome>{children}</SiteChrome>
+        <HomeSoundToggle />
       </body>
     </html>
   );

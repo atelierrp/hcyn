@@ -29,9 +29,15 @@ export function SiteHeader({ compact = false, inline = false }) {
         aria-label="Hardcore Yoga Nidra — home"
       >
         <span className="site-logo__full" aria-hidden={compact}>
-          <span>hardcore</span>
-          <span>yoga</span>
-          <span>nidra</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="site-logo__mark"
+            src="/brand/hcyn.svg"
+            alt=""
+            width={1645}
+            height={746}
+            draggable={false}
+          />
         </span>
         <span className="site-logo__short" aria-hidden={!compact}>
           HCYN

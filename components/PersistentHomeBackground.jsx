@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { registerHomeSoundApplier } from "@/lib/homeSound";
 
 const YOUTUBE_ID = "eBnWYTcDTuw";
 const POSTER = "/images/hcyn3-high.jpg";
 const IFRAME_ID = "hcyn-home-yt";
 
-/** Stable embed URL (no window.origin) so SSR and client hydrate match. */
 const EMBED_SRC = (() => {
   const params = new URLSearchParams({
     autoplay: "1",
@@ -46,11 +46,32 @@ function loadYouTubeAPI() {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
       document.head.appendChild(tag);
+    } else if (window.YT?.Player) {
+      resolve(window.YT);
     }
   });
 }
 
 const VOLUME_FADE_MS = 500;
+
+function isMobileSound() {
+  if (typeof window === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  const iOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const touch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  const narrow = window.matchMedia("(max-width: 767px)").matches;
+  return iOS || touch || narrow;
+}
+
+function postYtCommand(func, args = []) {
+  const iframe = document.getElementById(IFRAME_ID);
+  iframe?.contentWindow?.postMessage(
+    JSON.stringify({ event: "command", func, args }),
+    "*",
+  );
+}
 
 function fadeYouTubeVolume(player, from, to, durationMs, onDone) {
   if (!player || typeof player.setVolume !== "function") {
@@ -87,29 +108,31 @@ function fadeYouTubeVolume(player, from, to, durationMs, onDone) {
 
 /**
  * Site wallpaper — stays mounted across navigations.
- * Iframe stays in the React tree (no detach) so iOS Safari can keep autoplay.
+ * Mute UI: HomeSoundToggle → applyHomeSoundMuted (same tap turn).
  */
 export function PersistentHomeBackground() {
+  const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const mutedRef = useRef(true);
   const fadeCancelRef = useRef(null);
-  const [muted, setMuted] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-
+  function bindPlayer() {
     loadYouTubeAPI()
       .then((YT) => {
-        if (cancelled || playerRef.current) return;
+        if (!document.getElementById(IFRAME_ID)) return;
+        if (playerRef.current?.mute) return;
 
         const player = new YT.Player(IFRAME_ID, {
           events: {
             onReady: (event) => {
-              if (cancelled) return;
               playerRef.current = event.target;
-              event.target.mute();
-              event.target.setVolume(0);
-              event.target.playVideo();
+              try {
+                // Mute only — never setVolume(0); iOS won't raise it later.
+                event.target.mute();
+                event.target.playVideo();
+              } catch {
+                /* ignore */
+              }
             },
           },
         });
@@ -118,30 +141,35 @@ export function PersistentHomeBackground() {
       .catch(() => {
         /* wallpaper still plays muted via embed params */
       });
+  }
 
-    return () => {
-      cancelled = true;
-      fadeCancelRef.current?.();
-    };
-  }, []);
-
-  function toggleSound(event) {
-    event.stopPropagation();
-    const player = playerRef.current;
-    const nextMuted = !mutedRef.current;
+  function applyMuted(nextMuted) {
     mutedRef.current = nextMuted;
-    setMuted(nextMuted);
-
     fadeCancelRef.current?.();
     fadeCancelRef.current = null;
 
-    if (!player) return;
+    const player = playerRef.current;
+    const mobile = isMobileSound();
+
+    // Always fire postMessage in this turn (helps when API wrapper is stale).
+    postYtCommand("playVideo");
+    if (nextMuted) {
+      postYtCommand("mute");
+    } else {
+      postYtCommand("unMute");
+      postYtCommand("setVolume", [100]);
+    }
+
+    if (!player || typeof player.mute !== "function") return;
 
     try {
-      player.playVideo();
+      player.playVideo?.();
 
       if (nextMuted) {
-        // Fade out, then mute
+        if (mobile) {
+          player.mute();
+          return;
+        }
         let from = 100;
         try {
           from = player.getVolume?.() ?? 100;
@@ -161,8 +189,16 @@ export function PersistentHomeBackground() {
             }
           },
         );
+      } else if (mobile) {
+        // No iframe reload — that restarts and iOS pauses unmuted autoplay.
+        player.unMute();
+        try {
+          player.setVolume?.(100);
+        } catch {
+          /* ignore */
+        }
+        player.playVideo?.();
       } else {
-        // Unmute at 0, then fade in
         try {
           player.setVolume(0);
           player.unMute();
@@ -181,37 +217,34 @@ export function PersistentHomeBackground() {
     }
   }
 
-  const soundOn = !muted;
-  const label = muted ? "unmute" : "mute";
+  useEffect(() => {
+    bindPlayer();
+    const unregister = registerHomeSoundApplier(applyMuted);
+    return () => {
+      fadeCancelRef.current?.();
+      unregister();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount once
+  }, []);
 
   return (
-    <>
-      <div className="home-bg-slot" aria-hidden="true">
-        <div className="home-bg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="home-bg__poster" src={POSTER} alt="" />
-          <iframe
-            id={IFRAME_ID}
-            className="home-bg__iframe"
-            src={EMBED_SRC}
-            title="Hardcore Yoga Nidra"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-            tabIndex={-1}
-          />
-        </div>
-        <div className="home-bg-slot__veil" />
+    <div className="home-bg-slot" aria-hidden="true">
+      <div className="home-bg">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="home-bg__poster" src={POSTER} alt="" />
+        <iframe
+          ref={iframeRef}
+          id={IFRAME_ID}
+          className="home-bg__iframe"
+          src={EMBED_SRC}
+          title="Hardcore Yoga Nidra"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write"
+          allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin"
+          tabIndex={-1}
+        />
       </div>
-      <button
-        type="button"
-        className="home-sound-toggle"
-        aria-pressed={soundOn}
-        aria-label={muted ? "Unmute sound" : "Mute sound"}
-        onClick={toggleSound}
-      >
-        {label}
-      </button>
-    </>
+      <div className="home-bg-slot__veil" />
+    </div>
   );
 }

@@ -1,15 +1,7 @@
 /**
- * Fade wallpaper to black before paint on installation detail routes.
+ * Installation detail routes — wallpaper veil is handled via CSS
+ * (`html:has(.install-detail)`) and SiteChrome forceBlack.
  */
 export default function InstallationDetailLayout({ children }) {
-  return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `document.documentElement.dataset.scrollFaded="true"`,
-        }}
-      />
-      {children}
-    </>
-  );
+  return children;
 }

@@ -12,7 +12,12 @@ export default function ConnectPage() {
       <div className="connect-list">
         {connectPage.email ? (
           <p>
-            <a href={`mailto:${connectPage.email}`}>email</a>
+            <a
+              className="connect-list__external"
+              href={`mailto:${connectPage.email}`}
+            >
+              email
+            </a>
           </p>
         ) : null}
         {connectPage.links.map((link) => (
