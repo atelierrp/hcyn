@@ -30,7 +30,6 @@ export const liveEvents = [
     date: "2026-06-06/2026-06-20",
     country: "Switzerland",
     status: "past",
-    registrationRoute: "/register/zurich",
     note: "Source listed as upcoming; sessions were Sat 6/6, 13/6, 20/6 2026. Recategorized as past for HCYN scaffold (Aug 2026).",
   },
   {
@@ -42,7 +41,6 @@ export const liveEvents = [
     date: "2026-05-29",
     country: "Armenia",
     status: "past",
-    registrationRoute: "/register/yerevan",
     note: "Source listed as upcoming; session date 29 May 2026. Recategorized as past for HCYN scaffold (Aug 2026).",
   },
   {
@@ -54,7 +52,6 @@ export const liveEvents = [
     date: "2025-12-20",
     country: "Thailand",
     status: "past",
-    installationRoute: "/installations/black-square-chiang-mai",
     note: "Linked to black-square-chiang-mai provisionally; confirm whether Dec 20 2025 maps to that realization.",
   },
   {

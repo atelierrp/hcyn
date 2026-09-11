@@ -1,12 +1,22 @@
 import Link from "next/link";
 
-function EventBody({ event }) {
+function EventBody({ event, linked }) {
   const place = [event.venue, event.city].filter(Boolean).join(", ");
 
   return (
     <>
       <span className="event-item__date">{event.dateLabel}</span>
-      {place ? <span className="event-item__place">{place}</span> : null}
+      {place ? (
+        <span className="event-item__place">
+          {place}
+          {linked ? (
+            <span className="event-item__arrow" aria-hidden="true">
+              {" "}
+              ↗
+            </span>
+          ) : null}
+        </span>
+      ) : null}
     </>
   );
 }
@@ -18,7 +28,7 @@ function EventItem({ event }) {
     <li className="event-item">
       {href ? (
         <Link href={href} className="event-item__link">
-          <EventBody event={event} />
+          <EventBody event={event} linked />
         </Link>
       ) : (
         <div className="event-item__text">

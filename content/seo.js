@@ -60,7 +60,7 @@ export const seo = {
     index: false,
   },
 
-  /** /register/[slug] */
+  /** /register/[slug] — only upcoming (Bangkok) is indexed; past pages are noindex */
   register: {
     pathPrefix: "/register/",
     index: true,

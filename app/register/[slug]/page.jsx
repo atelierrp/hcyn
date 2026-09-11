@@ -20,6 +20,8 @@ export async function generateMetadata({ params }) {
   return pageMetadata("register", {
     title: registration.title,
     description: `Registration — ${registration.city}`,
+    // Only upcoming sessions (e.g. Bangkok) are indexed; past forms stay noindex.
+    index: registration.status === "upcoming",
   });
 }
 
