@@ -1,44 +1,88 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const YOUTUBE_ID = "eBnWYTcDTuw";
 const POSTER = "/images/hcyn3-high.jpg";
+const IFRAME_ID = "hcyn-home-yt";
 
-function youtubeCoverSrc(videoId, origin) {
+/** Stable embed URL (no window.origin) so SSR and client hydrate match. */
+const EMBED_SRC = (() => {
   const params = new URLSearchParams({
     autoplay: "1",
     mute: "1",
-    muted: "1",
     controls: "0",
     loop: "1",
-    playlist: videoId,
+    playlist: YOUTUBE_ID,
     playsinline: "1",
     modestbranding: "1",
     rel: "0",
-    showinfo: "0",
     iv_load_policy: "3",
-    cc_load_policy: "0",
     disablekb: "1",
     fs: "0",
     enablejsapi: "1",
   });
-  if (origin) params.set("origin", origin);
-  // youtube.com (not nocookie) — more reliable autoplay on iOS Safari
-  return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  return `https://www.youtube.com/embed/${YOUTUBE_ID}?${params.toString()}`;
+})();
+
+function loadYouTubeAPI() {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("no window"));
+  }
+  if (window.YT?.Player) {
+    return Promise.resolve(window.YT);
+  }
+  return new Promise((resolve) => {
+    const previous = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      previous?.();
+      resolve(window.YT);
+    };
+    if (
+      !document.querySelector(
+        'script[src="https://www.youtube.com/iframe_api"]',
+      )
+    ) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    }
+  });
 }
 
-function nudgeYouTubePlay(iframe) {
-  if (!iframe?.contentWindow) return;
-  const win = iframe.contentWindow;
-  win.postMessage(
-    JSON.stringify({ event: "command", func: "mute", args: [] }),
-    "*",
-  );
-  win.postMessage(
-    JSON.stringify({ event: "command", func: "playVideo", args: [] }),
-    "*",
-  );
+const VOLUME_FADE_MS = 500;
+
+function fadeYouTubeVolume(player, from, to, durationMs, onDone) {
+  if (!player || typeof player.setVolume !== "function") {
+    onDone?.();
+    return () => {};
+  }
+
+  let cancelled = false;
+  let frame = 0;
+  const start = performance.now();
+
+  const tick = (now) => {
+    if (cancelled) return;
+    const t = Math.min(1, (now - start) / durationMs);
+    const value = Math.round(from + (to - from) * t);
+    try {
+      player.setVolume(value);
+    } catch {
+      /* ignore */
+    }
+    if (t < 1) {
+      frame = requestAnimationFrame(tick);
+    } else {
+      onDone?.();
+    }
+  };
+
+  frame = requestAnimationFrame(tick);
+  return () => {
+    cancelled = true;
+    cancelAnimationFrame(frame);
+  };
 }
 
 /**
@@ -46,63 +90,128 @@ function nudgeYouTubePlay(iframe) {
  * Iframe stays in the React tree (no detach) so iOS Safari can keep autoplay.
  */
 export function PersistentHomeBackground() {
-  const iframeRef = useRef(null);
-
-  const src = useMemo(() => {
-    const origin =
-      typeof window !== "undefined"
-        ? window.location.origin
-        : "https://hardcoreyoganidra.com";
-    return youtubeCoverSrc(YOUTUBE_ID, origin);
-  }, []);
+  const playerRef = useRef(null);
+  const mutedRef = useRef(true);
+  const fadeCancelRef = useRef(null);
+  const [muted, setMuted] = useState(true);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return undefined;
+    let cancelled = false;
 
-    const play = () => nudgeYouTubePlay(iframe);
+    loadYouTubeAPI()
+      .then((YT) => {
+        if (cancelled || playerRef.current) return;
 
-    const onLoad = () => {
-      play();
-      window.setTimeout(play, 400);
-      window.setTimeout(play, 1200);
-    };
-
-    iframe.addEventListener("load", onLoad);
-
-    const onInteract = () => {
-      play();
-    };
-    window.addEventListener("touchstart", onInteract, {
-      passive: true,
-      once: true,
-    });
-    window.addEventListener("click", onInteract, { once: true });
+        const player = new YT.Player(IFRAME_ID, {
+          events: {
+            onReady: (event) => {
+              if (cancelled) return;
+              playerRef.current = event.target;
+              event.target.mute();
+              event.target.setVolume(0);
+              event.target.playVideo();
+            },
+          },
+        });
+        playerRef.current = player;
+      })
+      .catch(() => {
+        /* wallpaper still plays muted via embed params */
+      });
 
     return () => {
-      iframe.removeEventListener("load", onLoad);
-      window.removeEventListener("touchstart", onInteract);
-      window.removeEventListener("click", onInteract);
+      cancelled = true;
+      fadeCancelRef.current?.();
     };
   }, []);
 
+  function toggleSound(event) {
+    event.stopPropagation();
+    const player = playerRef.current;
+    const nextMuted = !mutedRef.current;
+    mutedRef.current = nextMuted;
+    setMuted(nextMuted);
+
+    fadeCancelRef.current?.();
+    fadeCancelRef.current = null;
+
+    if (!player) return;
+
+    try {
+      player.playVideo();
+
+      if (nextMuted) {
+        // Fade out, then mute
+        let from = 100;
+        try {
+          from = player.getVolume?.() ?? 100;
+        } catch {
+          from = 100;
+        }
+        fadeCancelRef.current = fadeYouTubeVolume(
+          player,
+          from,
+          0,
+          VOLUME_FADE_MS,
+          () => {
+            try {
+              player.mute();
+            } catch {
+              /* ignore */
+            }
+          },
+        );
+      } else {
+        // Unmute at 0, then fade in
+        try {
+          player.setVolume(0);
+          player.unMute();
+        } catch {
+          /* ignore */
+        }
+        fadeCancelRef.current = fadeYouTubeVolume(
+          player,
+          0,
+          100,
+          VOLUME_FADE_MS,
+        );
+      }
+    } catch {
+      /* player not ready yet */
+    }
+  }
+
+  const soundOn = !muted;
+  const label = muted ? "unmute" : "mute";
+
   return (
-    <div className="home-bg-slot" aria-hidden="true">
-      <div className="home-bg" aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="home-bg__poster" src={POSTER} alt="" />
-        <iframe
-          ref={iframeRef}
-          className="home-bg__iframe"
-          src={src}
-          title="Hardcore Yoga Nidra"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-          tabIndex={-1}
-        />
+    <>
+      <div className="home-bg-slot" aria-hidden="true">
+        <div className="home-bg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="home-bg__poster" src={POSTER} alt="" />
+          <iframe
+            id={IFRAME_ID}
+            className="home-bg__iframe"
+            src={EMBED_SRC}
+            title="Hardcore Yoga Nidra"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            tabIndex={-1}
+          />
+        </div>
+        <div className="home-bg-slot__veil" />
       </div>
-      <div className="home-bg-slot__veil" />
-    </div>
+      <button
+        type="button"
+        className="home-sound-toggle"
+        aria-pressed={soundOn}
+        aria-label={muted ? "Unmute sound" : "Mute sound"}
+        onClick={toggleSound}
+      >
+        {label}
+      </button>
+    </>
   );
 }

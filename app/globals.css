@@ -1249,6 +1249,33 @@ html.install-detail-gallery-active .site-nav-fixed {
 
 /* —— Homepage / site wallpaper —— */
 
+.home-sound-toggle {
+  position: fixed;
+  top: calc(var(--page-padding-top) + var(--nav-top-nudge));
+  right: var(--page-padding-inline);
+  z-index: 15;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-family-nav);
+  font-size: var(--font-size-small);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--color-white);
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.home-sound-toggle:focus,
+.home-sound-toggle:focus-visible {
+  outline: none;
+}
+
 .home-bg-slot {
   position: fixed;
   inset: 0;
