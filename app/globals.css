@@ -1654,12 +1654,15 @@ html:has(.project-page) .home-bg-slot__veil {
   pointer-events: none;
 }
 
-/* Avoid transform scale on iOS — it often blanks the YouTube layer.
-   Use % of the clipped mount (not vw) so the iframe cannot widen the page. */
+/*
+  Avoid transform scale on iOS — it often blanks the YouTube layer.
+  Oversize with vw/vh cover math (clipped by .home-bg__iframe-mount) so
+  16:9 fills a tall phone without letterboxing.
+*/
 @media (max-width: 767px) {
   .home-bg__iframe {
-    width: 250%;
-    height: 250%;
+    width: max(160vw, 220vh);
+    height: max(160vh, 90vw);
     transform: translate(-50%, -50%);
   }
 }
