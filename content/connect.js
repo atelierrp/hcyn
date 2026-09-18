@@ -3,7 +3,7 @@
  */
 export const connectPage = {
   title: "Connect",
-  email: "connect@hardcoreyoganidra.com",
+  email: "contact@hardcoreyoganidra.com",
   links: [
     {
       label: "@hardcoreyoganidra",
