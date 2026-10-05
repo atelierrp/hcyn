@@ -50,14 +50,14 @@ function InstallationCard({ installation }) {
   );
 }
 
-function InstallationSection({ id, title, items }) {
+function InstallationSection({ id, title, items, emptyLabel = "TBA" }) {
   return (
     <section className="install-section" aria-labelledby={id}>
       <h2 className="install-section__title" id={id}>
         {title}
       </h2>
       {items.length === 0 ? (
-        <p className="install-section__empty">No {title} installations.</p>
+        <p className="install-section__empty">{emptyLabel}</p>
       ) : (
         <ul className="install-grid">
           {items.map((installation) => (
@@ -79,12 +79,15 @@ export function InstallationList({ upcoming, past }) {
         id="installations-upcoming"
         title="upcoming"
         items={upcoming}
+        emptyLabel="TBA"
       />
-      <InstallationSection
-        id="installations-past"
-        title="archive"
-        items={past}
-      />
+      {past.length > 0 ? (
+        <InstallationSection
+          id="installations-past"
+          title="archive"
+          items={past}
+        />
+      ) : null}
     </div>
   );
 }

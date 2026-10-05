@@ -18,7 +18,7 @@ export const liveEvents = [
     city: "Bangkok",
     venue: "Begrüntes Haus",
     country: "Thailand",
-    status: "upcoming",
+    status: "past",
     registrationRoute: "/register/bangkok",
   },
   {

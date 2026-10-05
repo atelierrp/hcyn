@@ -47,7 +47,7 @@ export function EventList({ upcoming, past }) {
           upcoming
         </h2>
         {upcoming.length === 0 ? (
-          <p style={{ color: "var(--color-gray)" }}>No upcoming events.</p>
+          <p style={{ color: "var(--color-gray)" }}>TBA</p>
         ) : (
           <ul className="section-block__list event-list">
             {upcoming.map((e) => (
