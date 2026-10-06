@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="page-home">
       <h1 className="visually-hidden">Hardcore Yoga Nidra</h1>
-      {/* Wallpaper video lives in root layout (PersistentHomeBackground) */}
+      {/* Wallpaper image lives in root layout (PersistentHomeBackground) */}
     </div>
   );
 }
